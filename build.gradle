@@ -1,0 +1,173 @@
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+
+buildscript {
+    ext {
+        spring_boot_version = '1.5.7.RELEASE'
+    }
+
+    dependencies {
+        classpath 'org.ysb33r.gradle:vfs-gradle-plugin:1.0'
+        classpath 'commons-httpclient:commons-httpclient:3.1'
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${spring_boot_version}"
+    }
+}
+
+plugins {
+    id 'org.asciidoctor.convert' version '1.5.3'
+    id 'com.github.jruby-gradle.base' version '1.4.0'
+    id 'announce'
+    id 'build-announcements'
+}
+
+apply plugin: 'com.github.jruby-gradle.base'
+apply plugin: 'org.ysb33r.vfs'
+apply plugin: 'java'
+apply plugin: 'org.asciidoctor.convert'
+apply plugin: 'org.springframework.boot'
+
+if (System.getenv('GITLAB_CI')) {
+    String commitTag = System.getenv('CI_COMMIT_TAG')
+    if (commitTag) {
+        version = commitTag
+    } else {
+        version = "ci_undefined"
+    }
+} else {
+    version = "local"
+}
+
+ext {
+    revealjsVersion = '3.5.0'
+    asciidoctorBackendVersion = 'master'
+    downloadDir = new File(buildDir, 'download')
+    templateDir = new File(downloadDir, 'templates')
+    revealjsDir = new File(downloadDir, 'reveal.js')
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+    maven {
+        name 'rubygems-release'
+        url 'http://rubygems-proxy.torquebox.org/releases'
+    }
+    maven {
+        name 'rubygems-prerelease'
+        url 'http://rubygems-proxy.torquebox.org/prereleases'
+    }
+}
+
+dependencies {
+    compile 'org.springframework.boot:spring-boot-starter-actuator'
+    compile 'org.springframework.boot:spring-boot-starter-web'
+
+    gems 'rubygems:slim:3.0.8'
+}
+
+task download {
+    doLast {
+        mkdir downloadDir
+        vfs {
+            cp "zip:https://github.com/asciidoctor/asciidoctor-reveal.js/archive/${asciidoctorBackendVersion}.zip!asciidoctor-reveal.js-${asciidoctorBackendVersion}/templates",
+                    templateDir, recursive: true, overwrite: true
+            cp "zip:https://github.com/hakimel/reveal.js/archive/${revealjsVersion}.zip!reveal.js-${revealjsVersion}",
+                    revealjsDir, recursive: true, overwrite: true
+        }
+    }
+}
+
+download {
+    description "Download extra reveal js resources"
+    outputs.dir templateDir
+    outputs.dir revealjsDir
+}
+
+asciidoctorj {
+    version = '1.5.5'
+}
+
+asciidoctor {
+    dependsOn jrubyPrepare
+
+    sources {
+        include 'presentation.adoc'
+    }
+
+    resources {
+        from(sourceDir) {
+            include 'css/**'
+            include 'images/**'
+        }
+        from(downloadDir) {
+            include 'reveal.js/**'
+        }
+    }
+
+    backends 'revealjs'
+
+    attributes   \
+          'build-gradle': file('build.gradle'),
+            'gitlab-ci-yml': file('.gitlab-ci.yml'),
+            'templateDir': file('src/main/templates'),
+            'sourcedir': project.sourceSets.main.java.srcDirs[0],
+            'endpoint-url': 'http://example.org',
+            'source-highlighter': 'coderay',
+            'imagesdir': './images',
+            'toc': 'left',
+            'icons': 'font',
+            'setanchors': '',
+            'idprefix': '',
+            'idseparator': '-',
+            'docinfo1': '',
+            'revealjs_transition': 'convex',
+            'revealjs_customtheme': './css/axians.css',
+            'revealjs_history': 'true',
+//            'revealjs_theme': 'sky',
+            'revealjs_slideNumber': 'true'
+
+    options template_dirs: [templateDir.absolutePath]
+
+    dependsOn download
+}
+
+processResources {
+    from(asciidoctor) {
+        into 'static'
+    }
+}
+
+
+springBoot {
+    buildInfo {
+        def buildProperties = [
+                operatingSystem      : "${System.properties['os.name']} (${System.properties['os.version']})",
+                continuousIntegration: System.getenv('CI')?.toBoolean() ?: false,
+                buildTime            : ZonedDateTime.now().format(DateTimeFormatter.ISO_ZONED_DATE_TIME)
+        ]
+
+        if (System.getenv('GITLAB_CI')) {
+            buildProperties.GITLAB_BUILD_JAVA_VERSION_BUILD = System.getenv('JAVA_VERSION_BUILD') ?: ''
+            buildProperties.GITLAB_BUILD_JAVA_VERSION_MINOR = System.getenv('JAVA_VERSION_MINOR') ?: ''
+            buildProperties.GITLAB_BUILD_JAVA_VERSION_MAJOR = System.getenv('JAVA_VERSION_MAJOR') ?: ''
+            buildProperties.GITLAB_BUILD_CI_SERVER_VERSION = System.getenv('CI_SERVER_VERSION') ?: ''
+            buildProperties.GITLAB_BUILD_CI_BUILD_ID = System.getenv('CI_BUILD_ID') ?: ''
+            buildProperties.GITLAB_BUILD_CI_COMMIT_TAG = System.getenv('CI_COMMIT_TAG') ?: ''
+            buildProperties.GITLAB_BUILD_CI_BUILD_REF = System.getenv('CI_BUILD_REF') ?: ''
+            buildProperties.GITLAB_BUILD_CI_BUILD_REF_NAME = System.getenv('CI_BUILD_REF_NAME') ?: ''
+            buildProperties.GITLAB_BUILD_CI_PIPELINE_ID = System.getenv('CI_PIPELINE_ID') ?: ''
+            buildProperties.GITLAB_BUILD_CI_SERVER_REVISION = System.getenv('CI_SERVER_REVISION') ?: ''
+        }
+
+        // Generate extra build info.
+        additionalProperties = buildProperties
+    }
+}
+
+jar {
+    archiveName = 'app.jar'
+}
+
+bootRun {
+    systemProperties['spring.profiles.active'] = project.gradle.startParameter.systemPropertiesArgs['spring.profiles.active']
+}

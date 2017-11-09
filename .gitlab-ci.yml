@@ -1,0 +1,92 @@
+image: docker-shared.artifactory.axians-cloud.be/axians-images/gitlab-runner-oracle-jdk-8
+
+variables:
+  GIT_STRATEGY: fetch
+
+before_script:
+  - mkdir -p .gradle_home
+
+# tag::stages[]
+stages:
+  - compilation
+  - verification
+  - build
+  - int-deploy
+  - qa-deploy
+  - prd-deploy
+# end::stages[]
+
+
+# tag::compilation[]
+compile classes:
+  stage: compilation
+  script:
+    - ./gradlew -g .gradle_home clean classes --continue --stacktrace
+  allow_failure: false
+# end::compilation[]
+
+# tag::verification[]
+perform unit tests:
+  stage: verification
+  script:
+    - ./gradlew -g .gradle_home clean check --continue --stacktrace
+  allow_failure: false
+  artifacts:
+    when: on_failure
+    paths:
+      - build/reports/tests/test
+# end::verification[]
+
+# tag::build[]
+build:
+  stage: build
+  script:
+    - ./gradlew -g .gradle_home clean build --continue --stacktrace
+    - oc project devoxx-presentation-dev
+    - oc start-build devoxx-presentation-binary --from-file=build/libs/app.jar -w -n devoxx-presentation-dev
+    - oc tag devoxx-presentation-dev/devoxx-presentation-binary:latest devoxx-presentation-dev/devoxx-presentation-binary:$CI_COMMIT_TAG
+  allow_failure: false
+  only:
+    - tags
+# end::build[]
+
+# tag::int_deploy[]
+deploy to integration:
+  stage: int-deploy
+  script:
+    - oc project devoxx-presentation-dev
+    - oc tag devoxx-presentation-dev/devoxx-presentation-binary:$CI_COMMIT_TAG devoxx-presentation-dev/devoxx-presentation-binary:int
+  environment:
+    name: int
+    url: https://devoxx-presentation.int.axians-cloud.be
+  only:
+    - tags
+# end::int_deploy[]
+
+# tag::qa_deploy[]
+deploy to qa:
+  when: manual
+  stage: qa-deploy
+  script:
+    - oc project devoxx-presentation-dev
+    - oc tag devoxx-presentation-dev/devoxx-presentation-binary:$CI_COMMIT_TAG devoxx-presentation-dev/devoxx-presentation-binary:qa
+  environment:
+    name: qa
+    url: https://devoxx-presentation.qa.axians-cloud.be
+  only:
+    - tags
+# end::qa_deploy[]
+
+# tag::prd_deploy[]
+deploy to production:
+  when: manual
+  stage: prd-deploy
+  script:
+    - oc project devoxx-presentation-dev
+    - oc tag devoxx-presentation-dev/devoxx-presentation-binary:$CI_COMMIT_TAG devoxx-presentation-dev/devoxx-presentation-binary:prd
+  environment:
+    name: prd
+    url: https://devoxx-presentation.app.axians.be
+  only:
+    - tags
+# tag::prd_deploy[]

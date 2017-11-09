@@ -1,0 +1,134 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: spring-boot-pipeline-int-qa
+  annotations:
+    description: "A template for setting up a runtime instance with a spring boot java 8 project, using the imagestream of the dev project"
+    iconClass: "icon-java"
+    tags: "spring,boot,pipeline"
+labels:
+  template: spring-boot-pipeline
+objects:
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    creationTimestamp: null
+    generation: 6
+    labels:
+      app: ${APP_SLUG}
+    name: ${APP_SLUG}
+  spec:
+    replicas: 1
+    selector:
+      app: ${APP_SLUG}
+      deploymentconfig: ${APP_SLUG}
+    strategy:
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: ${APP_SLUG}
+          deploymentconfig: ${APP_SLUG}
+      spec:
+        containers:
+        - env:
+          - name: SPRING_PROFILES_ACTIVE
+            value: ${SPRING_BOOT_PROFILE}
+          imagePullPolicy: Always
+          name: ${APP_SLUG}
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ${APP_SLUG}
+        from:
+          kind: ImageStreamTag
+          name: ${APP_SLUG}-binary:${IMAGESTREAM_TAG}
+          namespace: ${DEV_PROJECT_NAMESPACE}
+      type: ImageChange
+  status:
+    observedGeneration: 6
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: ${APP_SLUG}
+    name: ${APP_SLUG}
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: ${APP_SLUG}
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Route
+  metadata:
+    creationTimestamp: null
+    labels:
+      env: ${ROUTER_ENV}
+      app: ${APP_SLUG}
+    name: ${APP_SLUG}
+  spec:
+    host: ${URL_PREFIX}.${ROUTER_SUBPATH}.axians-cloud.be
+    port:
+      targetPort: 8080-tcp
+    tls:
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
+    to:
+      kind: Service
+      name: ${APP_SLUG}
+      weight: 100
+parameters:
+  - name: URL_PREFIX
+    description: Name of the spring boot profile to use (typically either 'int' or 'qa' or 'prd').
+    value: "int"
+    required: true
+  - name: SPRING_BOOT_PROFILE
+    description: Name of the spring boot profile to use (typically either 'int' or 'qa' or 'prd').
+    value: "int"
+    required: true
+  - name: APP_SLUG
+    description: URL and yaml friendly name for your app. Use the same slug you used to set up the dev project image stream!
+    value: "my-app"
+    required: true
+  - name: ROUTER_SUBPATH
+    description: URL and yaml friendly name for your app. Use the same slug you used to set up the dev project image stream!
+    value: "my-app"
+    required: true
+  - name: ROUTER_ENV
+    description: URL and yaml friendly name for your app. Use the same slug you used to set up the dev project image stream!
+    value: "my-app"
+    required: true
+  - name: IMAGESTREAM_TAG
+    description: The tag of the image stream. Depends on the pipeline configuration but typically 'int' or 'qa' or 'prd'.
+    value: "int"
+    required: true
+  - name: DEV_PROJECT_NAMESPACE
+    description: Namespace of the dev project where the image stream is in
+    value: 'my-project'
+    required: true
+

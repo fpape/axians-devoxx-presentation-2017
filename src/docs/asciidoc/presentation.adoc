@@ -1,0 +1,674 @@
+:asciidoctor-link: http://asciidoctor.org/[Asciidoctor]
+:gradle-link: http://www.gradle.org/[Gradle]
+
+
+== CI/CD with GitLab and OpenShift @ Axians
+// OK FP
+
+Frédéric Pape <frederic.pape@axians.com>
+
+Joris De Veirman <joris.deveirman@axians.com>
+
+ifndef::imagesdir[:imagesdir: images]
+ifndef::sourcedir[:sourcedir: ../java]
+
+
+// TODO DEMO: setup dev/int/qa/prd environments for presentation project
+// TODO DEMO: push tag to repository => presentation gets deployed on int
+
+//== Demo Time
+//
+//[%step]
+//* Failed :-(
+//* Thanks a lot Murphy
+
+== Demo Time
+// OK FP
+
+[%step]
+* Done :-)
+* Thank you Murphy
+
+[%step]
+* OpenShift == OpenShift Container Platform
+
+
+== About Joris
+
+[%step]
+* 13 years of duty @ Axians
+* Started as Java Dev ...
+* ... Technical lead ...
+* ... Solution Architect ...
+* ... and now Lead for Industry Software Solutions
+*  Oh ... I like Industrial IoT
+* ... and we do IIoT all the time
+
+
+== About Frederic
+// OK FP
+
+[%step]
+* In the software industry since 2001
+* @ Axians since 2006
+* Started as Java dev...
+[%step]
+** ... fell in love with Groovy ...
+** ... currently exploring Kotlin
+* Passionate about creating and delivering software
+
+
+== Why CI / CD @ Axians
+// OK FP
+
+[%step]
+* We don't like bugs...
+[%step]
+** ... so every commit should be properly tested ...
+** ... in an automated manner
+* Automate deployments to minimize human errors
+* Keep track of what is deployed where
+* Our customers want fast results...
+[%step]
+** ...but they want to stay in control
+
+
+[transition=slide noTransition]
+== Tools High Level overview
+// OK FP
+
+----
+           +---------------+
+           |               |
+           |     GitLab    |
+           |               |
+           +-------+-------+
+                   |
+                   |
+                   |
+                   |
+           +-------v-------+                +-----------------+
+           |               |                |                 |
+           |   OpenShift   +---------------->   Artifactory   |
+           |               |                |                 |
+           +---------------+                +-----------------+
+----
+
+[transition=noTransition]
+== Tools High Level overview
+// OK FP
+
+----
+           +---------------+
+           |               |
+           |     GitLab    |
+           |               |
+           +-------+-------+
+                   |
+                   |
+                   |
+                   |
+           +-------v-------+                +-----------------+
+           |               |                | *************** |
+           |   OpenShift   +----------------> * Artifactory * |
+           |               |                | *************** |
+           +---------------+                +-----------------+
+----
+
+
+== Artifactory @ Axians
+// OK FP
+
+[%step]
+* Internal proxy for gradle & npm artifacts
+* Artifact repository
+[%step]
+** Internal repo for gradle & npm build artifacts
+** Spring boot docker images
+** GitLab runner docker images
+
+
+[transition=slide noTransition]
+== Tools High Level overview
+// OK FP
+
+----
+           +---------------+
+           |               |
+           |     GitLab    |
+           |               |
+           +-------+-------+
+                   |
+                   |
+                   |
+                   |
+           +-------v-------+                +-----------------+
+           |               |                | *************** |
+           |   OpenShift   +----------------> * Artifactory * |
+           |               |                | *************** |
+           +---------------+                +-----------------+
+----
+
+[transition=noTransition]
+== Tools High Level overview
+// OK FP
+
+----
+           +---------------+
+           | ************* |
+           | *   GitLab  * |
+           | ************* |
+           +-------+-------+
+                   |
+                   |
+                   |
+                   |
+           +-------v-------+                +-----------------+
+           |               |                |                 |
+           |   OpenShift   +---------------->   Artifactory   |
+           |               |                |                 |
+           +---------------+                +-----------------+
+----
+
+== GitLab @ Axians
+// OK FP
+
+Mainly using GitLab as/for:
+[%step]
+* Version Control System
+* Merge requests
+* Integrated CI / CD
+* Nice support for pipeline-as-code via yml configuration
+* Slack integration
+* *Demo-time*
+
+// TODO Demo: project UI, merge request, pipelines
+
+== GitLab pipeline-as-code: CI
+// OK FP
+
+[source,yaml]
+.stages
+----
+include::{GitLab-ci-yml}[tags=stages]
+----
+
+== GitLab pipeline-as-code: CI
+// OK FP
+
+[source,yaml]
+.compilation
+----
+include::{GitLab-ci-yml}[tags=compilation]
+----
+
+== GitLab pipeline-as-code: CI
+// OK FP
+
+[source,yaml]
+.verification
+----
+include::{GitLab-ci-yml}[tags=verification]
+----
+
+
+[transition=slide noTransition]
+== Tools High Level overview
+// OK FP
+
+----
+           +---------------+
+           | ************* |
+           | *   GitLab  * |
+           | ************* |
+           +-------+-------+
+                   |
+                   |
+                   |
+                   |
+           +-------v-------+                +-----------------+
+           |               |                |                 |
+           |   OpenShift   +---------------->   Artifactory   |
+           |               |                |                 |
+           +---------------+                +-----------------+
+----
+
+
+[transition=noTransition]
+== Tools High Level overview
+// OK FP
+
+----
+           +---------------+
+           |               |
+           |     GitLab    |
+           |               |
+           +-------+-------+
+                   |
+                   |
+                   |
+                   |
+           +-------v-------+                +-----------------+
+           | ************* |                |                 |
+           | * OpenShift * +---------------->   Artifactory   |
+           | ************* |                |                 |
+           +---------------+                +-----------------+
+----
+
+[%notitle]
+== Commercials
+
+image::commercial-break.jpg[canvas,size=cover]
+
+== myStaff
+
+[%step]
+* A planning tool for Medical staff teams...
+*  ... but not an ordinary planning tool
+[%step]
+** Include a minimum standard for the roster
+** Respect the preferences of the teams: holidays, shifts, ...
+** Non intrusive for the planner
+** Finding the optimal planning, respecting all desiderata
+** Respect last minute changes: illness, ...
+
+[%notitle]
+== myStaff - m1
+
+image::mystaff/m1.png[background,size=cover]
+
+[%notitle]
+== myStaff - m2
+
+image::mystaff/m2.png[background,size=cover]
+
+[%notitle]
+== myStaff - m3
+
+image::mystaff/m3.png[background,size=cover]
+
+== OpenShift @ Axians
+// OK FP
+
+[%step]
+* 15 projects in parallel...
+[%step]
+** ... for each project we have 4 environments
+** ... quite time consuming to setup and maintain
+* Scalable: easy to add nodes
+* Environment isolation
+//* Fast and easy setup of environments and applications
+* Autoscaling and rolling updates of applications
+* Open source and enterprise support by Red Hat®
+* Cool web interface...
+[%step]
+** ... even cooler CLI
+
+[transition=slide noTransition]
+== OpenShift @ Axians overview
+
+----
++------------------------+     +-------------------------------------+
+| DEV Project            |     | INT/QA/PRD Project                  |
+|                        |     |                                     |
+| +--------------+--+--+ |     | +------------------+      +-----+   |
+| |              |  |  | |     | |                  |      |     |+  |
+| | ImageStream  |  |  | |     | | Service          +------> POD ||+ |
+| |              |  |  | |     | |                  |  +--->     ||| |
+| +--------------+^-+--+ |     | +------------------+  |   |     ||| |
++-----------------|------+     |                       |   +-------| |
+                  |            | +------------------+  |    +------| |
+                  |            | |                  |  |     +-----+ |
+                  +--------------+ DeploymentConfig +--+             |
+                   TAG         | |                  |                |
+                               | +------------------+                |
+                               +-------------------------------------+
+----
+
+[transition=noTransition]
+== OpenShift @ Axians overview
+
+----
++------------------------+     +-------------------------------------+
+| DEV Project            |     | INT/QA/PRD Project                  |
+|                        |     |                                     |
+| +--------------+--+--+ |     | +------------------+      +-----+   |
+| |              |  |  | |     | |                  |      |*****|+  |
+| | ImageStream  |  |  | |     | | Service          +------>*POD*||+ |
+| |              |  |  | |     | |                  |  +--->*****||| |
+| +--------------+^-+--+ |     | +------------------+  |   |     ||| |
++-----------------|------+     |                       |   +-------| |
+                  |            | +------------------+  |    +------| |
+                  |            | |                  |  |     +-----+ |
+                  +--------------+ DeploymentConfig +--+             |
+                   TAG         | |                  |                |
+                               | +------------------+                |
+                               +-------------------------------------+
+----
+
+== OpenShift @ Axians: Pods
+
+[%step]
+* K8s term for docker container
+* Contains: Springboot application, database,...
+* Exposes port(s): 8080, 8081
+* Spinned up or teared down at the will of OpenShift
+
+[transition=slide noTransition]
+== OpenShift @ Axians overview
+
+----
++------------------------+     +-------------------------------------+
+| DEV Project            |     | INT/QA/PRD Project                  |
+|                        |     |                                     |
+| +--------------+--+--+ |     | +------------------+      +-----+   |
+| |              |  |  | |     | |                  |      |*****|+  |
+| | ImageStream  |  |  | |     | | Service          +------>*POD*||+ |
+| |              |  |  | |     | |                  |  +--->*****||| |
+| +--------------+^-+--+ |     | +------------------+  |   |     ||| |
++-----------------|------+     |                       |   +-------| |
+                  |            | +------------------+  |    +------| |
+                  |            | |                  |  |     +-----+ |
+                  +--------------+ DeploymentConfig +--+             |
+                   TAG         | |                  |                |
+                               | +------------------+                |
+                               +-------------------------------------+
+----
+
+[transition=noTransition]
+== OpenShift @ Axians overview
+
+----
++------------------------+     +-------------------------------------+
+| DEV Project            |     | INT/QA/PRD Project                  |
+|                        |     |                                     |
+| +--------------+--+--+ |     | +------------------+      +-----+   |
+| |              |  |  | |     | |******************|      |     |+  |
+| | ImageStream  |  |  | |     | |*Service         *+------> POD ||+ |
+| |              |  |  | |     | |******************|  +--->     ||| |
+| +--------------+^-+--+ |     | +------------------+  |   |     ||| |
++-----------------|------+     |                       |   +-------| |
+                  |            | +------------------+  |    +------| |
+                  |            | |                  |  |     +-----+ |
+                  +--------------+ DeploymentConfig +--+             |
+                   TAG         | |                  |                |
+                               | +------------------+                |
+                               +-------------------------------------+
+----
+
+== OpenShift @ Axians: SVC
+
+[%step]
+* Services are loadbalancing traffic to underlying pods
+* Used by pods to communicate to other services
+* Can be exposed to the world via routes
+
+[transition=slide noTransition]
+== OpenShift @ Axians overview
+
+----
++------------------------+     +-------------------------------------+
+| DEV Project            |     | INT/QA/PRD Project                  |
+|                        |     |                                     |
+| +--------------+--+--+ |     | +------------------+      +-----+   |
+| |              |  |  | |     | |******************|      |     |+  |
+| | ImageStream  |  |  | |     | |*Service         *+------> POD ||+ |
+| |              |  |  | |     | |******************|  +--->     ||| |
+| +--------------+^-+--+ |     | +------------------+  |   |     ||| |
++-----------------|------+     |                       |   +-------| |
+                  |            | +------------------+  |    +------| |
+                  |            | |                  |  |     +-----+ |
+                  +--------------+ DeploymentConfig +--+             |
+                   TAG         | |                  |                |
+                               | +------------------+                |
+                               +-------------------------------------+
+----
+
+[transition=noTransition]
+== OpenShift @ Axians overview
+
+----
++------------------------+     +-------------------------------------+
+| DEV Project            |     | INT/QA/PRD Project                  |
+|                        |     |                                     |
+| +--------------+--+--+ |     | +------------------+      +-----+   |
+| |              |  |  | |     | |                  |      |     |+  |
+| | ImageStream  |  |  | |     | | Service          +------> POD ||+ |
+| |              |  |  | |     | |                  |  +--->     ||| |
+| +--------------+^-+--+ |     | +------------------+  |   |     ||| |
++-----------------|------+     |                       |   +-------| |
+                  |            | +------------------+  |    +------| |
+                  |            | |******************|  |     +-----+ |
+                  +--------------+*DeploymentConfig*+--+             |
+                   TAG         | |******************|                |
+                               | +------------------+                |
+                               +-------------------------------------+
+----
+
+== OpenShift @ Axians: DC
+
+[%step]
+* Knows all about te pod configuration
+[%step]
+** # replications
+** update strategy
+** resource limits
+** Health checks
+* Links to an ImagesStream tag
+
+
+[transition=slide noTransition]
+== OpenShift @ Axians overview
+
+----
++------------------------+     +-------------------------------------+
+| DEV Project            |     | INT/QA/PRD Project                  |
+|                        |     |                                     |
+| +--------------+--+--+ |     | +------------------+      +-----+   |
+| |              |  |  | |     | |                  |      |     |+  |
+| | ImageStream  |  |  | |     | | Service          +------> POD ||+ |
+| |              |  |  | |     | |                  |  +--->     ||| |
+| +--------------+^-+--+ |     | +------------------+  |   |     ||| |
++-----------------|------+     |                       |   +-------| |
+                  |            | +------------------+  |    +------| |
+                  |            | |******************|  |     +-----+ |
+                  +--------------+*DeploymentConfig*+--+             |
+                   TAG         | |******************|                |
+                               | +------------------+                |
+                               +-------------------------------------+
+----
+
+[transition=noTransition]
+== OpenShift @ Axians overview
+
+----
++------------------------+     +-------------------------------------+
+| DEV Project            |     | INT/QA/PRD Project                  |
+|                        |     |                                     |
+| +--------------+--+--+ |     | +------------------+      +-----+   |
+| |**************|  |  | |     | |                  |      |     |+  |
+| |*ImageStream *|  |  | |     | | Service          +------> POD ||+ |
+| |**************|  |  | |     | |                  |  +--->     ||| |
+| +--------------+^-+--+ |     | +------------------+  |   |     ||| |
++-----------------|------+     |                       |   +-------| |
+                  |            | +------------------+  |    +------| |
+                  |            | |                  |  |     +-----+ |
+                  +--------------+ DeploymentConfig +--+             |
+                   TAG         | |                  |                |
+                               | +------------------+                |
+                               +-------------------------------------+
+----
+
+== OpenShift @ Axians: IS
+
+[%step]
+* Git-ish for docker containers
+* On each build a new "commit" is created
+* "commit's" are tag-able
+
+== OpenShift @ Axians
+// OK FP
+
+* *Demo-time*
+
+// TODO demo: show dev and runtime templates
+
+
+== GitLab pipeline-as-code: CD
+
+[source,yaml]
+.build
+----
+include::{GitLab-ci-yml}[tags=build]
+----
+
+== GitLab pipeline-as-code: CD
+
+[source,yaml]
+.deploy to integration
+----
+include::{GitLab-ci-yml}[tags=int_deploy]
+----
+
+== GitLab pipeline-as-code: CD
+
+[source,yaml]
+.deploy to QA
+----
+include::{GitLab-ci-yml}[tags=qa_deploy]
+----
+
+== GitLab pipeline-as-code: CD
+
+[source,yaml]
+.deploy to production
+----
+include::{GitLab-ci-yml}[tags=prd_deploy]
+----
+
+[%notitle]
+== Commercials
+
+image::commercial-break.jpg[canvas,size=cover]
+
+[%notitle]
+== Soletanche
+
+image::sb/soletanche.png[canvas,size=cover]
+
+[%notitle]
+== Soletanche - HK
+
+image::sb/hk-dashboard-detail.png[canvas,size=cover]
+
+[%notitle]
+== Soletanche - Pile
+
+image::sb/pile-depth-charts.png[canvas,size=cover]
+
+[%notitle]
+== Soletanche - PM
+
+image::sb/pm-production-data-line-charts.png[canvas,size=cover]
+
+== GitLab & OpenShift @ AXIANS
+
+[%step]
+* Gitlab runner service is deployed on OpenShift
+* GitLab runner service spins up worker runners on demand
+* Axians GitLab runner docker images have the OpenShift client tools installed
+
+== Axians Cloud
+
+[%step]
+//* https://devoxx-2017-presentation.app.axians-cloud.be --TODO check URL
+* Managed Hybrid cloud solution
+* Dedicated Container platform
+* Managed DevOps
+* Powered by Enterprise Open Source
+* Cost effective / Scalable / Secure
+* ISO 27001 *
+
+
+== So who is Axians?
+
+[%step]
+* Part of the group Vinci - Vinci Energies
+* Our BU focusses on Software Development & Consultancy
+* We embrace Open Source & Enterprise Open Source
+* Red Hat® Premier partner
+* Microsoft IoT & Data Platform partner
+* We use a lot of Spring and GR8 technologies: gradle/groovy/spockframework
+
+//[%notitle]
+== q & a
+// OK FP
+
+[.thumb]
+image::q_and_a.jpg[scaledwidth=75%]
+
+
+////
+
+
+In this session we will demonstrate how we address continuous delivery at Axians.
+
+Topics we'll address:
+* our GitLab and OpenShift setup
+* using OpenShift templates to simplify OpenShift setup
+* using pipeline-as-code in GitLab
+* continuous integration in GitLab and gradle
+* continuous delivery on the OpenShift platform
+
+
+END OF PRESENTATION
+////
+//== Introduction
+//
+//* This is a user manual for an example project
+//* This project does something
+//* We just haven't decided what that is yet
+//
+//== Source Code
+//
+//[source,java]
+//.Java code from project
+//----
+//include::{sourcedir}/example/StringUtils.java[tags=contains,indent=0]
+//----
+//
+//This page was built by the following command:
+//
+// $ ./gradlew asciidoctor
+//
+//== Including documents from subdir
+//
+//.include::subdir/_b.adoc[]
+//
+//include::subdir/_b.adoc[]
+//
+//== Images
+//
+//[.thumb]
+//image::sunset.jpg[scaledwidth=75%]
+//
+//== Attributes
+//
+//.Built-in
+//asciidoctor-version:: {asciidoctor-version}
+//safe-mode-name:: {safe-mode-name}
+//docdir:: {docdir}
+//docfile:: {docfile}
+//imagesdir:: {imagesdir}
+//
+//.Custom
+//project-version:: {project-version}
+//sourcedir:: {sourcedir}
+//endpoint-url:: {endpoint-url}
+//
+//== build.gradle
+//
+//[source,groovy]
+//----
+//include::{build-gradle}[]
+//----

@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: spring-boot-dev-builder
+  annotations:
+    description: "A template for setting up a imagestream and buildconfig"
+    iconClass: "icon-java"
+    tags: "spring,boot,pipeline,jenkins"
+labels:
+  template: spring-boot-dev-builder
+objects:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    creationTimestamp: null
+    labels:
+      build: ${APP_SLUG}-binary
+    name: ${APP_SLUG}-binary
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${APP_SLUG}-binary:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      binary: {}
+      type: Binary
+    strategy:
+      type: Source
+      sourceStrategy:
+        from:
+          kind: "DockerImage"
+          name: "docker-shared.artifactory.axians-cloud.be/axians-images/openshift-springboot-sti-oracle-jdk-8:0.6"
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    creationTimestamp: null
+    generation: 9
+    labels:
+      build: ${APP_SLUG}-binary
+    name: ${APP_SLUG}-binary
+  spec:
+    tags:
+    - annotations: null
+      generation: 9
+      importPolicy: {}
+      name: int
+    - annotations: null
+      generation: null
+      importPolicy: {}
+      name: latest
+    - annotations: null
+      generation: 8
+      importPolicy: {}
+      name: qa
+  status:
+    dockerImageRepository: ""
+parameters:
+  - name: APP_SLUG
+    displayName: Application name
+    description: URL and yaml friendly name for your app
+    value: "my-awesome-app"
+    required: true
